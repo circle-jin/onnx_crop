@@ -1,0 +1,5 @@
+{
+    "mode" : "pow-mul",
+    "model_path" : "../yolov5s_blaize_sim_pow_mul.onnx",
+    "save_path" : "./yolov5s_11_02_powmul_test.onnx"
+}

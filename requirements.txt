@@ -1,0 +1,4 @@
+# onnx_crop requirements
+# Usage: pip install -r requirements.txt
+
+onnx
