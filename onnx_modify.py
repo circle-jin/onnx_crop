@@ -21,13 +21,6 @@ def print_json_information(config_json):
         for key, value in config_json.items():
             print(f'   {key} : {value}')
 
-# [Input file information]
-#    PREFIX               : 1028
-#    ONNX Model           : ./yolov5s_crop_post_processing.onnx
-#    Prepost file         : ./UserConfig/prepost_yolov5s_crop_post_processing.yaml
-#    Address mapping file : ./UserConfig/addrmap_in_yolov5s_crop_post_processing.yaml
-#    Option : -CheckPrePost : ON
-#    Option : -SaveOptOnnx
 def save_onnx_model(onnx_model, save_path):
     onnx.checker.check_model(onnx_model)
     onnx.save(onnx_model, save_path)
@@ -122,16 +115,7 @@ def parse_args() -> argparse.Namespace:
     """Parse and return command line arguments"""
     parser = argparse.ArgumentParser(add_help=True)
     args = parser.add_argument_group('Options')
-    # args.add_argument('-p', '--model_path', type=str, required=True,
-    #                   help='Example: ../yolov5s.onnx')
-    # args.add_argument('-sp', '--save_path', type=str, required=True,
-    #                   help='Example: ../yolov5s.onnx')
-    # args.add_argument('-m', '--mode', type=str,
-    #                   help='Example: pow-mul, end-crop')
-    # args.add_argument('-ect', '--end_crop_target',  type=str,
-    #                 help='require_mode: end-crop, Example: Sigmoid_204,Sigmoid_223,Sigmoid_242')
-    # args.add_argument('-oh', '--output_shape',  type=str,
-    #                   help='require_mode: end-crop, Example: [1,3,80,80,85] [1,3,80,80,85]')
+    
     args.add_argument(
         '-c',
         '--config_file',
