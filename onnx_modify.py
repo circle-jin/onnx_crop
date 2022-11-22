@@ -83,29 +83,10 @@ def crop_end_of_node(graph, onnx_model, crop_target, output_shape):
 
     # 끝 노드를 output을 수정 (새로운 output과 연결되게)
     for i in range(0, len(crop_target)):
-        # attributes 필요 없는 노드라면
-        if len(node_map[crop_target[i]].attribute) == 0:
-            end_node = onnx.helper.make_node(
-                name=node_map[crop_target[i]].name,
-                op_type=node_map[crop_target[i]].op_type,
-                inputs=node_map[crop_target[i]].input,
-                outputs=["out" + str(i)],
-            )
-        # attributes 필요 있는 노드라면
-        else:
-            end_node = onnx.helper.make_node(
-                name=node_map[crop_target[i]].name,
-                op_type=node_map[crop_target[i]].op_type,
-                inputs=node_map[crop_target[i]].input,
-                outputs=["out" + str(i)],
-                attributes=node_map[crop_target[i]].attribute
-            ) 
-
-        # 수정할 노드의 index 가져오기
+        # 수정할 노드를 index로 접근하여 순서대로 output 수정하기
         for j in range(0, len(graph.node)):
             if graph.node[j].name == crop_target[i]:
-                graph.node.remove(graph.node[j])
-                graph.node.insert(j, end_node)
+                graph.node[j].output[0] = "out" + str(i)
 
     print('[end-crop] finish')
     print('------------------------------------------')
@@ -115,7 +96,7 @@ def parse_args() -> argparse.Namespace:
     """Parse and return command line arguments"""
     parser = argparse.ArgumentParser(add_help=True)
     args = parser.add_argument_group('Options')
-    
+
     args.add_argument(
         '-c',
         '--config_file',
