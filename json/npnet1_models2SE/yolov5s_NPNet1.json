@@ -1,0 +1,7 @@
+{
+    "mode" : "end-crop",
+    "model_path" : "../npnet1_models2SE/small/yolov5s_NPNet1.onnx",
+    "save_path" : "../npnet1_models2SE_modify/small/yolov5s_NPNet1.onnx",
+    "end_crop_target" : ["Transpose_303", "Transpose_389", "Transpose_475"],
+    "output_shape" : [[1,3,80,80,25], [1,3,40,40,25], [1,3,20,20,25]]
+}

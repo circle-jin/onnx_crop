@@ -1,0 +1,7 @@
+{
+    "mode" : "end-crop",
+    "model_path" : "./yolov5s_NPNet1_best_wo_postprocess.onnx",
+    "save_path" : "./yolov5s_NPNet1_test.onnx",
+    "end_crop_target" : ["Concat_40"],
+    "output_shape" : [[1,12,320,320]]
+}

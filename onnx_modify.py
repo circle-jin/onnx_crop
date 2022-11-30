@@ -47,11 +47,10 @@ def save_onnx_model(onnx_model, save_path):
     onnx.save(onnx_model, save_path)
     print("[Successful], saved_path : " + save_path)
 
-def modify_attribute_of_Conv(graph, onnx_model, modify_require):
+def modify_attribute_of_Conv(graph, modify_require):
     """Modify the attribute of the Conv
     Args:
         graph (onnx.ModelProto): loaded onnx model graph
-        onnx_model (onnx.ModelProto): loaded onnx model
         modify_require (dict): conditions of attributes to be changed
     """
     print('[modify-attribute] start')
@@ -114,12 +113,11 @@ def modify_attribute_of_Conv(graph, onnx_model, modify_require):
                 graph.initializer[i].raw_data = rawdata
     print('[modify-attribute] finish')
 
-def convert_pow_to_mul(graph, onnx_model):
+def convert_pow_to_mul(graph):
     """POW-> MUL conversion (Two-squared pow converted to Mul)
 
     Args:
         graph (onnx.ModelProto): loaded onnx model graph
-        onnx_model (onnx.ModelProto): loaded onnx model
     """
     print('[pow-mul] start')
     index = []
@@ -141,12 +139,11 @@ def convert_pow_to_mul(graph, onnx_model):
 
     print('[pow-mul] finish')
 
-def crop_end_of_node(graph, onnx_model, end_crop_node, output_shape):
+def crop_end_of_node(graph, end_crop_node, output_shape):
     """Delete all nodes after the node of the condition
 
     Args:
         graph (onnx.ModelProto): loaded onnx model graph
-        onnx_model (onnx.ModelProto): loaded onnx model
         end_crop_node (list): A list of names in nodes that must cut the end
         output_shape (list): Output shape of nodes that need to cut the end
     """
@@ -230,7 +227,7 @@ def main():
                 return
 
             if 'pow-mul' in config.get('mode', None):
-                convert_pow_to_mul(graph, onnx_model)
+                convert_pow_to_mul(graph)
             if 'end-crop' in config.get('mode', None):
                 end_crop_config = config.get('end_crop', None)
                 end_crop_node = end_crop_config.get('end_crop_node', None)
@@ -238,10 +235,10 @@ def main():
                 if end_crop_node == None or output_shape == None:
                     print("Enter end_crop information in json")
                     return
-                crop_end_of_node(graph, onnx_model, end_crop_node, output_shape)
+                crop_end_of_node(graph, end_crop_node, output_shape)
             if 'modify-attribute' in config.get('mode', None):
                 modify_require = config.get('modify_conv', None)
-                modify_attribute_of_Conv(graph, onnx_model, modify_require)
+                modify_attribute_of_Conv(graph, modify_require)
             save_onnx_model(onnx_model, save_path)
 
 if __name__ == '__main__':

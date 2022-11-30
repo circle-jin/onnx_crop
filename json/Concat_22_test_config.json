@@ -1,0 +1,7 @@
+{
+    "mode" : "end-crop",
+    "model_path" : "../yolov5s_blaize_sim_pow_mul.onnx",
+    "save_path" : "./yolov5s_1102_Concat_22_end_test.onnx",
+    "end_crop_target" : ["Concat_22"],
+    "output_shape" : [[1,64,160,160]]
+}

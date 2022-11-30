@@ -1,0 +1,7 @@
+{
+    "mode" : "end-crop",
+    "model_path" : "../npnet1_models2SE_modify/small/yolov5s6_script_test.onnx",
+    "save_path" : "../npnet1_models2SE_modify/small/yolov5s6_kernel_crop.onnx",
+    "end_crop_node" : ["Conv_224", "Conv_308", "Conv_392"],
+    "output_shape" : [[1,75,80,80], [1,75,40,40], [1,75,20,20]]
+}

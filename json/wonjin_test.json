@@ -1,0 +1,7 @@
+{
+    "mode" : "test",
+    "model_path" : "/root/work/drp_translator/v1.8/drp-ai_translator_release/yolov5s_blaize_sim_pow_mul.onnx",
+    "save_path" : "./yolov5s_1122_test.onnx",
+    "end_crop_target" : ["Sigmoid_4"],
+    "output_shape" : [[1,32,320,320]]
+}
