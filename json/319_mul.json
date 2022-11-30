@@ -1,7 +1,0 @@
-{
-    "mode" : "end-crop",
-    "model_path" : "../yolov5s_1103_end_Mul5_test_kernel_5.onnx",
-    "save_path" : "./yolov5s_1103_end_Mul5_test_319_kernel_5.onnx",
-    "end_crop_target" : ["Mul_5"],
-    "output_shape" : [[1,32,319,319]]
-}
