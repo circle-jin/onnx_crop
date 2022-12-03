@@ -1,0 +1,11 @@
+{
+    "mode" : ["middle-crop"],
+    "model_path" : "/root/work/drp_translator/v1.8/drp-ai_translator_release/npnet1_models2SE_modify/nano/yolov5n_NPNet1_1_perf_det_testttttt.onnx",
+    "save_path" : "/root/work/drp_translator/v1.8/drp-ai_translator_release/npnet1_models2SE_modify/nano/yolov5n_NPNet1_1_perf_det_testttttt_modify.onnx",
+
+    "middle_crop":{
+        "start_crop_node" : "/model_0_conv_conv/Conv",
+        "end_crop_node" : "/model_1_conv/Conv"
+    }
+
+}
