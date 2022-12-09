@@ -204,6 +204,30 @@ def print_json_information(config_json):
             print(f'   {key} : {value}')
         print('------------------------------------------')
 
+def change_shape_of_input_output_of_model(graph, change_shape_config):
+    """Change the shape of the input and output of the model.
+
+    Args:
+        graph (onnx.ModelProto): loaded onnx model graph
+        change_shape_config (dict): Shape of input and output to change
+    """
+    print('[change-shape] start')
+    # Delete output shape values ​​fixed on all nodes
+    for i in range(0, len(graph.value_info)):
+        graph.value_info.pop()
+
+    # Delete the original input and create an input with a new Shape
+    input_shape = change_shape_config['input_shape']
+    original_input = graph.input.pop(0)
+    graph.input.extend([helper.make_tensor_value_info(original_input.name, TensorProto.FLOAT, input_shape)])
+
+    # Delete the original output and create an output with a new Shape
+    output_shape = change_shape_config['output_shape']
+    for j in range(0, len(graph.output)):
+        original_output = graph.output.pop(0)
+        graph.output.extend([helper.make_tensor_value_info(original_output.name, TensorProto.FLOAT, output_shape[j])])
+    print('[change-shape] finish')
+
 def save_onnx_model(onnx_model, save_path):
     """Save the model as ONNX
 
@@ -251,14 +275,12 @@ def main():
             node_map = createGraphMemberMap(graph.node)
             output_map = createGraphMemberMap(graph.output)
             
-
             if config.get('mode', None) == None:
                 """
                 if the argument is None
                 """
                 print("mode == None, usage: node_control.py [-h]")
                 return
-
             if 'pow-mul' in config.get('mode', None):
                 convert_pow_to_mul(graph)
             if 'end-crop' in config.get('mode', None):
@@ -277,6 +299,9 @@ def main():
                 start_crop_node = middle_crop_config.get('start_crop_node', None)
                 end_crop_node = middle_crop_config.get('end_crop_node', None)
                 crop_middle_of_node(graph, start_crop_node, end_crop_node)
+            if 'change-shape' in config.get('mode', None):
+                change_shape_config = config.get('change_shape', None)
+                change_shape_of_input_output_of_model(graph, change_shape_config)
             save_onnx_model(onnx_model, save_path)
 
 if __name__ == '__main__':
