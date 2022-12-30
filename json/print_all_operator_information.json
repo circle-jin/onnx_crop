@@ -1,0 +1,5 @@
+{
+    "mode" : ["print-info"],
+    "excel_name" : "yolov5s_NPNet1",
+    "model_path" : "/root/work/drp_translator/v1.8/drp-ai_translator_release/onnx_crop/yolov5s_NPNet1_onnxsim.onnx"
+}

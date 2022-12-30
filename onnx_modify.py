@@ -3,6 +3,8 @@ import onnx
 from onnx import helper, checker, TensorProto
 import json
 import numpy as np
+import pandas as pd
+from google.protobuf.json_format import MessageToDict
 
 global save_path
 global node_map
@@ -204,6 +206,90 @@ def print_json_information(config_json):
             print(f'   {key} : {value}')
         print('------------------------------------------')
 
+def print_node_information_model(graph, excel_name):
+    """The shape of the input and output and attribute information of the nodes are output in an Excel form.
+
+    Args:
+        graph (onnx.ModelProto): loaded onnx model graph
+        excel_name (str): File name required to save as .xlsx
+    """
+
+    print('------------------------------------------')
+    print('[print-info] start')
+
+    global node_map
+    model_input_info_map = createGraphMemberMap(graph.input)
+    model_output_info_map = createGraphMemberMap(graph.output)
+    value_info_map = createGraphMemberMap(graph.value_info)
+    initializer_info_map = createGraphMemberMap(graph.initializer)
+
+    # All the operator information that makes up the model.
+    operator_info = list()
+
+    # # iterator to get all nodes in the model
+    for i in range(0, len(graph.node)):
+        node_info = dict()
+        node_info['op_type'] = graph.node[i].op_type
+        node_info['attribute'] = dict()
+
+        # Add Node's Attribute to Node_info as a dictionary form
+        for attri_info in graph.node[i].attribute:
+            attri_info_dict = MessageToDict(attri_info)
+            attribute_name = attri_info_dict.pop('name')
+            node_info['attribute'][attribute_name] = attri_info_dict
+
+        target = {'input' : graph.node[i].input, "output" : graph.node[i].output}
+        # iterator to get the shape information of the input and output of the node
+        for key, node_value in target.items():
+            # Shape information of the (input or output) of the node
+            input_or_output_list = list()
+
+            for index, name in enumerate(node_value):
+                model_input_info = model_input_info_map.get(name, None)
+                model_output_info = model_output_info_map.get(name, None)
+                value_info = value_info_map.get(name, None)
+                initializer_info = initializer_info_map.get(name, None)
+
+                # Information about input or output is in one of Graph's model_input_info, model_output_info, Value_info, initializer_info.
+                input_or_output_info = None
+                if value_info != None:
+                    input_or_output_info = MessageToDict(value_info)
+                    input_or_output_shape = []
+                elif initializer_info != None:
+                    input_or_output_info = MessageToDict(initializer_info)
+                    input_or_output_shape = input_or_output_info.get('dims', None)
+                elif model_input_info != None:
+                    input_or_output_info = MessageToDict(model_input_info)
+                    input_or_output_shape = []
+                elif model_output_info != None:
+                    input_or_output_info = MessageToDict(model_output_info)
+                    input_or_output_shape = []
+
+                # In the case of model_input_info, model_output_info, and value_info, shape information is imported as a common iterator.
+                if input_or_output_shape is not None and len(input_or_output_shape) == 0:
+                    for shape in input_or_output_info['type']['tensorType']['shape']['dim']:
+                        input_or_output_shape.append(shape["dimValue"])
+
+                if input_or_output_info == None:
+                    print(name,", None")
+                else:
+                    # Adding multiple input or output information to the list
+                    input_or_output_list.append(input_or_output_shape)
+
+            # Add input_shape, output_shape information to node information
+            node_info[key + '_shape'] = input_or_output_list
+
+        # Add information of the node to the list of operators
+        operator_info.append(node_info)
+
+    # Convert and create a dictionary into a data frame
+    operator_info_df = pd.DataFrame(operator_info)
+    save_path = f"./{excel_name}.xlsx"
+    # Save all operator information in the model as .xlsx
+    operator_info_df.to_excel(save_path)
+    print("[Successful], excel_saved_path : " + save_path)
+    print('[print-info] finish')
+
 def change_shape_of_input_output_of_model(graph, change_shape_config):
     """Change the shape of the input and output of the model.
 
@@ -235,6 +321,8 @@ def save_onnx_model(onnx_model, save_path):
         onnx_model (onnx.ModelProto): loaded onnx model
         save_path (str): Path to save onnx model
     """
+    if save_path == None:
+        return
     onnx.checker.check_model(onnx_model)
     onnx.save(onnx_model, save_path)
     print("[Successful], saved_path : " + save_path)
@@ -267,7 +355,7 @@ def main():
 
             # path to save the modified model
             global save_path
-            save_path = config.get('save_path')
+            save_path = config.get('save_path', None)
 
             # Graph's node and output information is created in the form of dictionary (to access node with name instead of index)
             global node_map
@@ -302,6 +390,11 @@ def main():
             if 'change-shape' in config.get('mode', None):
                 change_shape_config = config.get('change_shape', None)
                 change_shape_of_input_output_of_model(graph, change_shape_config)
+            if 'print-info' in config.get('mode', None):
+                excel_name = config.get('excel_name', None)
+                print_node_information_model(graph, excel_name)
+
+            # If the save_path is not None, save the model.
             save_onnx_model(onnx_model, save_path)
 
 if __name__ == '__main__':
