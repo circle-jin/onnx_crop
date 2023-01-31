@@ -1,0 +1,5 @@
+{
+    "mode" : ["split-slice"],
+    "model_path" : "/root/work/drp_translator/v1.8/perf_0129_test/wonjin_original_yolov8n_coco128_pretrainPT_train_3_epoch_1x3x640x640_torch_130.onnx",
+    "save_path" : "/root/work/drp_translator/v1.8/perf_0129_test/0131_wonjin_original_yolov8n_coco128_pretrainPT_train_3_epoch_1x3x640x640_torch_130.onnx"
+}

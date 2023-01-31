@@ -33,6 +33,78 @@ def convert_pow_to_mul(graph):
             )
             graph.node.remove(graph.node[index]) 
             graph.node.insert(index, Mul_node)
+    print('[pow-mul] end')
+
+def convert_split_to_slice(graph):
+    """A function that changes Split to slice from the model's node
+       In the Opset 17 version, the function cannot be used Because it has the split value as an input rather than an attribute
+
+    Args:
+        graph (onnx.ModelProto): loaded onnx model graph
+    """
+    print('[split-slice] start')
+    global node_map
+    node_map
+
+    # Index of nodes
+    i = 0
+    # Number of split nodes in the model
+    split_count = 0
+
+    # iterator for finding node's Split operator
+    while(True):
+        if i == len(graph.node):
+            break
+
+        if graph.node[i].op_type == 'Split':
+            input_name = graph.node[i].input[0]
+
+            # Get axis, split value from attribute of the Split node
+            for attr_info in graph.node[i].attribute:
+                attr_info_dict = MessageToDict(attr_info)
+                if attr_info_dict['name'] == 'axis':
+                    tensor_name = f"{split_count}_slice_axes"
+                    tensor_shape = [1]
+                    tensor_value = [int(attr_info_dict['i'])]
+                    axes = onnx.helper.make_tensor(tensor_name, onnx.TensorProto.INT64, tensor_shape, tensor_value)
+                    graph.initializer.append(axes)
+                elif attr_info_dict['name'] == 'split':
+                    attr_info_dict['ints'] = list(map(int, attr_info_dict['ints']))
+                    split_shape = attr_info_dict['ints']
+
+            original_node = graph.node[i]
+            tensor_value = 0
+
+            # Remove split node, add slice node to current index
+            step_name =f"{split_count}_slice_steps"
+            step = onnx.helper.make_tensor(step_name, onnx.TensorProto.INT64, [1], [1])
+            graph.initializer.append(step)
+            graph.node.remove(graph.node[i])
+            for j in range(0, len(split_shape)):
+                for type in ['starts', 'ends']:
+                    if type == 'ends':
+                        tensor_value += split_shape[j]
+
+                    tensor_name = f"{split_count}_slice_{type}_{j}"
+                    slice_input_tensor = onnx.helper.make_tensor(tensor_name, onnx.TensorProto.INT64, [1], [tensor_value])
+                    graph.initializer.append(slice_input_tensor)
+
+                input_name = f"{split_count}_slice"
+                node = onnx.helper.make_node('Slice',
+                                            name=f"{split_count}_slice_{j}",
+                                            inputs=[original_node.input[0],
+                                                    f"{input_name}_starts_{j}",
+                                                    f"{input_name}_ends_{j}",
+                                                    f"{input_name}_axes",
+                                                    f"{split_count}_slice_steps"],
+                                            outputs=[original_node.output[j]])
+                # Even if there's only one split, there are many slices.
+                graph.node.insert(i+j, node)
+        # Index of nodes
+        i+=1
+        # Number of split nodes in the model
+        split_count+=1
+    print('[split-slice] end')
 
 def createGraphMemberMap(graph_member_list):
     """Create a dict to access the attributes(e.g. node,  output) of the graph with a name rather than an index
@@ -393,6 +465,8 @@ def main():
             if 'print-info' in config.get('mode', None):
                 excel_name = config.get('excel_name', None)
                 print_node_information_model(graph, excel_name)
+            if 'split-slice' in config.get('mode', None):
+                convert_split_to_slice(graph)
 
             # If the save_path is not None, save the model.
             save_onnx_model(onnx_model, save_path)

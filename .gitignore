@@ -1,0 +1,5 @@
+# onnx model
+*.onnx
+
+# all operator result (.xlsx)
+*.xlsx
