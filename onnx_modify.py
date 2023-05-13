@@ -10,6 +10,10 @@ global save_path
 global node_map
 global output_map
 
+
+
+dsfsf
+
 def convert_pow_to_mul(graph):
     """POW-> MUL conversion (Two-squared pow converted to Mul)
 
